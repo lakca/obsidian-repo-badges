@@ -2,6 +2,8 @@
 
 This Obsidian plugin appends badges to GitHub and GitLab repository URLs in your current markdown file. The badges include information such as stars, the latest release version, and the top programming language used in the repository.
 
+![demo](repo-badges.gif)
+
 ## Features
 
 - Automatically finds repository URLs in the current markdown file and appends badges.
@@ -11,7 +13,7 @@ This Obsidian plugin appends badges to GitHub and GitLab repository URLs in your
 
 ## Badges
 
-The following badges are supported:
+The following badges are default:
 
 - **Stars**: Displays the number of stars the repository has received.
 - **Latest Release Version**: Shows the most recent release version of the repository.
@@ -27,7 +29,7 @@ The following badges are supported:
 The plugin provides customizable settings, including:
 
 - Badge templates with placeholders `{author}` and `{name}` for dynamic badge generation.
-- Checkboxes to enable or disable existing badges, including any customized badges.
+- Toggle to set inline block badges.
 
 ## Installation
 
