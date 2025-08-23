@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+  "id": "repo-badges",
+  "name": "GitHub Repo Badges",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "A plugin to append badges for GitHub and GitLab repositories in markdown files.",
+  "author": "lakca",
+  "authorUrl": "https://github.com/lakca",
+  "isDesktopOnly": false
 }
