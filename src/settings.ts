@@ -49,8 +49,8 @@ export class BadgeSettingTab extends PluginSettingTab {
                 .onChange(async (value) => {
                 this.plugin.settings.badges = value.split('\n').map(line => line.trim()).filter(line => line.length > 0);
                 await this.plugin.saveSettings();
-                }).inputEl.style.width = '100%';
-            }).settingEl.style.display = 'block';
+                }).inputEl.classList.add('badge-settings-customize-textarea');
+            }).settingEl.classList.add('badge-settings-customize-setting');
 
         new Setting(containerEl)
             .setName('Inline Block Badges')

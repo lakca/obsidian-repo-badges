@@ -6,3 +6,11 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.badge-settings-customize-setting {
+  display: block;
+}
+
+.badge-settings-customize-textarea {
+  width: 100%;
+}
