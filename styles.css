@@ -1,33 +1,8 @@
-body {
-    font-family: Arial, sans-serif;
-}
+/*
 
-.badge {
-    display: inline-block;
-    padding: 5px 10px;
-    margin: 5px;
-    border-radius: 3px;
-    font-size: 12px;
-    color: white;
-}
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
 
-.badge.stars {
-    background-color: #f39c12; /* Orange for stars */
-}
+If your plugin does not need CSS, delete this file.
 
-.badge.release {
-    background-color: #27ae60; /* Green for latest release */
-}
-
-.badge.language {
-    background-color: #3498db; /* Blue for top language */
-}
-
-.badge-container {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.badge.hidden {
-    display: none;
-}
+*/
