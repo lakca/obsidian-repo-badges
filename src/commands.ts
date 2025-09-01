@@ -54,10 +54,8 @@ class BadgeSelectionModal extends Modal {
 
         // Focus Insert button and bind Enter key
         setTimeout(() => {
-            console.log('attaching keydown listener');
             insertBtnEl?.focus();
             contentEl.addEventListener('keydown', (e: KeyboardEvent) => {
-                console.log(e.key)
                 if (e.key === 'Escape') {
                     e.preventDefault();
                     this.close();
@@ -79,7 +77,6 @@ class BadgeSelectionModal extends Modal {
                     e.preventDefault();
                     insertBtnEl?.click();
                 }
-                console.log('focused element:', document.activeElement);
             });
         }, 0);
     }
@@ -203,7 +200,7 @@ export function addBadgesAtCursorPosition(plugin: GithubGitlabBadgesPlugin, edit
 }
 
 function extractRepoUrl(lineText: string, cursorPosition: number): string | null {
-    const urlPattern = /https?:\/\/(www\.)?(github\.com|gitlab\.com)\/([^\/]+)\/([^\/]+)/;
+    const urlPattern = /https?:\/\/(www\.)?(github\.com|gitlab\.com)\/([^\/]+)\/([^\/\)\] ]+)/;
     const match = lineText.slice(0, cursorPosition).match(urlPattern);
     return match ? match[0] : null;
 }
