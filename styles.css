@@ -14,3 +14,11 @@ If your plugin does not need CSS, delete this file.
 .badge-settings-customize-textarea {
   width: 100%;
 }
+
+.badge-selection-modal .mod-toggle:has(input[type="checkbox"]:focus) {
+  background-color: var(--bg-color-highlight-3)
+}
+
+.badge-selection-modal .setting-item-description {
+  white-space: pre-line;
+}

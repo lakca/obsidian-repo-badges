@@ -1,6 +1,89 @@
-import { Editor } from 'obsidian';
+import { Editor, EditorPosition } from 'obsidian';
 import { getBadges } from './badges';
 import GithubGitlabBadgesPlugin from 'main';
+import { Modal, Setting } from 'obsidian';
+
+class BadgeSelectionModal extends Modal {
+    selected: boolean[];
+    constructor(app: any, private badges: string[], private onConfirm: (selected: string[]) => void) {
+        super(app);
+        this.selected = Array(badges.length).fill(true);
+    }
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.empty();
+        contentEl.createEl('h3', { text: 'Select badges to insert:' });
+        contentEl.classList.add('badge-selection-modal');
+
+        contentEl.createEl('p', { cls: 'setting-item-description', text: 'Navigate using "arrow" and "Tab" keys. Select/Deselect by "Space", and "Enter" to confirm or "Escape" to cancel.\nUsually you just need to press "Enter" to apply you settings.' });
+
+        this.badges.forEach((badge, idx) => {
+            const setting = new Setting(contentEl)
+                .setName('')
+                .addToggle(toggle => {
+                    toggle.setValue(this.selected[idx]);
+                    toggle.onChange(val => {
+                        this.selected[idx] = val;
+                    });
+                })
+                .addExtraButton(btn => {
+                    btn.setIcon('copy');
+                    btn.setTooltip('Copy badge markdown');
+                    btn.onClick(() => navigator.clipboard.writeText(badge));
+                })
+                .setDesc(badge);
+            return setting;
+        });
+
+        // Bind Enter key to Insert button
+        let insertBtnEl: HTMLElement | null = null;
+        new Setting(contentEl)
+            .addButton(btn =>
+                btn.setButtonText('Insert')
+                    .setCta()
+                    .onClick(() => {
+                        this.onConfirm(this.badges.filter((_, i) => this.selected[i]));
+                        this.close();
+                    })
+                    .then(b => { insertBtnEl = b.buttonEl; })
+            )
+            .addButton(btn =>
+                btn.setButtonText('Cancel')
+                    .onClick(() => this.close())
+            );
+
+        // Focus Insert button and bind Enter key
+        setTimeout(() => {
+            console.log('attaching keydown listener');
+            insertBtnEl?.focus();
+            contentEl.addEventListener('keydown', (e: KeyboardEvent) => {
+                console.log(e.key)
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.close();
+                }
+                else if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    const focusable = contentEl.querySelectorAll('input[type="checkbox"]');
+                    if (focusable.length === 0) return;
+                    const currentIndex = Array.from(focusable).indexOf(document.activeElement as HTMLElement);
+                    let nextIndex = currentIndex;
+                    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        nextIndex = (currentIndex - 1 + focusable.length) % focusable.length;
+                    } else {
+                        nextIndex = (currentIndex + 1) % focusable.length;
+                    }
+                    (focusable[nextIndex] as HTMLElement).focus();
+                }
+                else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    insertBtnEl?.click();
+                }
+                console.log('focused element:', document.activeElement);
+            });
+        }, 0);
+    }
+}
 
 export async function addBadgesInCurrentFile(plugin: GithubGitlabBadgesPlugin, editor: Editor) {
     const activeFile = plugin.app.workspace.getActiveFile();
@@ -65,6 +148,9 @@ export function addBadgesAtCursorPosition(plugin: GithubGitlabBadgesPlugin, edit
     let match: RegExpExecArray | null;
     let found = false;
 
+    let insertPos: EditorPosition = { line: cursor.line, ch: cursor.ch };
+    let insertBadgeData: string[] = []
+
     while ((match = linkRegex.exec(lineText)) !== null) {
         const start = match.index;
         const end = match.index + match[0].length;
@@ -72,14 +158,14 @@ export function addBadgesAtCursorPosition(plugin: GithubGitlabBadgesPlugin, edit
             // Cursor is inside this link
             const repoUrl = match[2];
             const badgeData = getBadges(repoUrl, plugin.settings.badges, plugin.settings.authorPlaceholder, plugin.settings.namePlaceholder);
+
             if (badgeData.length > 0) {
                 // Insert badges after the link
-                const insertPos = { line: cursor.line, ch: end };
-                const badgeMarkdown = getBadgeBlock(badgeData, plugin.settings.inlineBlock) + '\n';
-                editor.replaceRange(badgeMarkdown, insertPos);
+                insertPos = { line: cursor.line, ch: end };
+                insertBadgeData = badgeData
+                found = true;
+                break;
             }
-            found = true;
-            break;
         }
     }
 
@@ -89,9 +175,29 @@ export function addBadgesAtCursorPosition(plugin: GithubGitlabBadgesPlugin, edit
         if (repoUrl) {
             const badgeData = getBadges(repoUrl, plugin.settings.badges, plugin.settings.authorPlaceholder, plugin.settings.namePlaceholder);
             if (badgeData.length > 0) {
-                const badgeMarkdown = getBadgeBlock(badgeData, plugin.settings.inlineBlock) + '\n';
-                editor.replaceRange(badgeMarkdown, cursor);
+                insertPos = { line: cursor.line, ch: cursor.ch };
+                insertBadgeData = badgeData
+                found = true;
             }
+        }
+    }
+
+    if (found && insertBadgeData.length > 0) {
+        // Use Obsidian's built-in Modal and UI components for badge selection
+        if (plugin.settings.confirmBeforeInsert && insertBadgeData.length > 1) {
+            new BadgeSelectionModal(plugin.app, insertBadgeData, (selectedBadges: string[]) => {
+                if (selectedBadges.length > 0) {
+                    const badgeMarkdown = getBadgeBlock(selectedBadges, plugin.settings.inlineBlock) + '\n';
+                    editor.replaceRange(badgeMarkdown, insertPos);
+                }
+            }).open();
+            return;
+        }
+
+        if (insertBadgeData.length > 0) {
+            // Insert badges after the link
+            const badgeMarkdown = getBadgeBlock(insertBadgeData, plugin.settings.inlineBlock) + '\n';
+            editor.replaceRange(badgeMarkdown, insertPos);
         }
     }
 }
@@ -104,7 +210,7 @@ function extractRepoUrl(lineText: string, cursorPosition: number): string | null
 
 function getBadgeBlock(badgeData: string[], inlineBlock: boolean): string {
     if (inlineBlock) {
-        return badgeData.map(badge => `<span style="display: inline-block;">${badge}</span>`).join(' ');
+        return badgeData.map(badge => `<span style="display: inline-block;">${badge}</span>`).join('');
     } else {
         return badgeData.join('\n');
     }

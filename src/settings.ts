@@ -4,9 +4,11 @@ export type BadgeSetting = string
 
 export const PRESET_BADGES: BadgeSetting[] = [
     '![GitHub stars](https://img.shields.io/github/stars/{author}/{name}.svg?style=social&label=Stars)',
+    '![GitHub license](https://img.shields.io/github/license/{author}/{name}.svg)',
     '![GitHub release](https://img.shields.io/github/v/release/{author}/{name}.svg)',
     '![GitHub top language](https://img.shields.io/github/languages/top/{author}/{name}.svg)',
     '![GitLab stars](https://img.shields.io/gitlab/stars/{author}/{name}.svg?style=social&label=Stars)',
+    '![GitLab license](https://img.shields.io/gitlab/license/{author}/{name}.svg)',
     '![GitLab release](https://img.shields.io/gitlab/v/release/{author}/{name}.svg)',
     '![GitLab top language](https://img.shields.io/gitlab/languages/top/{author}/{name}.svg)',
 ];
@@ -16,6 +18,7 @@ export interface BadgeSettings {
     authorPlaceholder: string;
     namePlaceholder: string;
     inlineBlock: boolean;
+    confirmBeforeInsert: boolean;
 }
 
 export const DEFAULT_SETTINGS: BadgeSettings = {
@@ -23,6 +26,7 @@ export const DEFAULT_SETTINGS: BadgeSettings = {
     authorPlaceholder: '{author}',
     namePlaceholder: '{name}',
     inlineBlock: false,
+    confirmBeforeInsert: false,
 };
 
 export class BadgeSettingTab extends PluginSettingTab {
@@ -61,6 +65,17 @@ export class BadgeSettingTab extends PluginSettingTab {
                     this.plugin.settings.inlineBlock = value;
                     await this.plugin.saveSettings();
                 }));
+
+        new Setting(containerEl)
+            .setName('Confirm Before Insertion')
+            .setDesc('Show a selection modal if multiple badges are available to insert (in current position).')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.confirmBeforeInsert)
+                .onChange(async (value) => {
+                    this.plugin.settings.confirmBeforeInsert = value;
+                    await this.plugin.saveSettings();
+                }));
+
 
     }
 }
