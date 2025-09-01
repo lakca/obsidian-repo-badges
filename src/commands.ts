@@ -187,7 +187,7 @@ export function addBadgesAtCursorPosition(plugin: GithubGitlabBadgesPlugin, edit
         if (plugin.settings.confirmBeforeInsert && insertBadgeData.length > 1) {
             new BadgeSelectionModal(plugin.app, insertBadgeData, (selectedBadges: string[]) => {
                 if (selectedBadges.length > 0) {
-                    const badgeMarkdown = getBadgeBlock(selectedBadges, plugin.settings.inlineBlock) + '\n';
+                    const badgeMarkdown = getBadgeBlock(selectedBadges, plugin.settings.inlineBlock);
                     editor.replaceRange(badgeMarkdown, insertPos);
                 }
             }).open();
@@ -196,7 +196,7 @@ export function addBadgesAtCursorPosition(plugin: GithubGitlabBadgesPlugin, edit
 
         if (insertBadgeData.length > 0) {
             // Insert badges after the link
-            const badgeMarkdown = getBadgeBlock(insertBadgeData, plugin.settings.inlineBlock) + '\n';
+            const badgeMarkdown = getBadgeBlock(insertBadgeData, plugin.settings.inlineBlock);
             editor.replaceRange(badgeMarkdown, insertPos);
         }
     }
@@ -210,8 +210,8 @@ function extractRepoUrl(lineText: string, cursorPosition: number): string | null
 
 function getBadgeBlock(badgeData: string[], inlineBlock: boolean): string {
     if (inlineBlock) {
-        return badgeData.map(badge => `<span style="display: inline-block;">${badge}</span>`).join('');
+        return badgeData.map(badge => `<span style="display: inline-block;">${badge}</span>`).join(' ');
     } else {
-        return badgeData.join('\n');
+        return badgeData.join('\n') + '\n';
     }
 }
